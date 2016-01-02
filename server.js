@@ -13,15 +13,9 @@ app.get('/', function(req, res) {
 server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0");
 
 io.on('connection', function(socket){
-  console.log('aqui');
-  
-  
   socket.on('message', function(message){
-    console.log(message);
     socket.broadcast.emit('message', message);
   });
-  
-  
 })
 
 
