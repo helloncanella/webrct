@@ -4,26 +4,26 @@ var peer;
 var remoteSessionDesciption;
 var socket = io.connect();
 var action;
+var candidatesMessages = [];
+
 
 var servers = null;
 
-var video = document.getElementById('video');
+var audio = document.getElementById('audio');
 
 var callButton = document.getElementById('call');
 
 callButton.onclick = function(){
   action = "to offer";
-  this.disabled = true;
   getUserMedia();
 };
 
 function getUserMedia(SDPdata){
   
   
-  
   var mediaConstraints = {
     audio: true,
-    video: true
+    video: false
   };
 
   navigator.getUserMedia(mediaConstraints, onMediaSucess, onFailure);
@@ -35,11 +35,10 @@ function getUserMedia(SDPdata){
     peer.addStream(mediaStream);
     
     peer.onaddstream = function(event){
-      video.src = URL.createObjectURL(event.stream);
+      audio.src = URL.createObjectURL(event.stream);
     };
 
     peer.onicecandidate = function(event){
-      
       
       var candidate = event.candidate;
       
@@ -72,7 +71,6 @@ function getUserMedia(SDPdata){
   }  
 }
 
-
 socket.on('message', function(message){
   var type = message.type;
   
@@ -93,15 +91,23 @@ socket.on('message', function(message){
     case 'icecandidate':
       
       if(peer){
-        var candidate = message.candidate.candidate;
-        var sdpMLineIndex = message.candidate.sdpMLineIndex;
       
-        peer.addIceCandidate(new RTCIceCandidate({
-          candidate: candidate,
-          sdpMLineIndex: sdpMLineIndex
-        }));
+        candidatesMessages.push(message);
+        
+        candidatesMessages.forEach(function(message){
+          var candidate = message.candidate.candidate;
+          var sdpMLineIndex = message.candidate.sdpMLineIndex;
+      
+          peer.addIceCandidate(new RTCIceCandidate({
+            candidate: candidate,
+            sdpMLineIndex: sdpMLineIndex
+          }));  
+        });
           
+      }else{
+        candidatesMessages.push(message);
       }
+      
       
       break;
 
@@ -110,10 +116,9 @@ socket.on('message', function(message){
 });
 
 
-
 function createAnswer(offerSPD){
   getUserMedia(offerSPD);
-}  
+} 
  
 
 
