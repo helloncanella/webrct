@@ -6,7 +6,6 @@ var socket = io.connect();
 var action;
 var candidatesMessages = [];
 
-
 var servers = null;
 
 var audio = document.getElementById('audio');
@@ -19,8 +18,7 @@ callButton.onclick = function(){
 };
 
 function getUserMedia(SDPdata){
-  
-  
+
   var mediaConstraints = {
     audio: true,
     video: false
@@ -91,10 +89,11 @@ socket.on('message', function(message){
     case 'icecandidate':
       
       if(peer){
-      
+        
         candidatesMessages.push(message);
         
         candidatesMessages.forEach(function(message){
+          
           var candidate = message.candidate.candidate;
           var sdpMLineIndex = message.candidate.sdpMLineIndex;
       
@@ -102,12 +101,12 @@ socket.on('message', function(message){
             candidate: candidate,
             sdpMLineIndex: sdpMLineIndex
           }));  
+        
         });
           
       }else{
         candidatesMessages.push(message);
       }
-      
       
       break;
 
@@ -115,12 +114,9 @@ socket.on('message', function(message){
   }
 });
 
-
 function createAnswer(offerSPD){
   getUserMedia(offerSPD);
-} 
- 
-
+}
 
 function onFailure(error) {
   console.error(error);
